@@ -1,0 +1,15 @@
+.root{
+    display: flex;
+}
+.toolbar{
+    padding-right: 24px;
+}
+.toolbarIcon{
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding : 0 8px;
+}
+.dashboardView{
+    margin: 75px 15px;
+}

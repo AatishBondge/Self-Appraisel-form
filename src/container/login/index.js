@@ -1,75 +1,126 @@
-import React, { Component } from 'react';
-import axios from 'axios';
-import {Redirect} from 'react-router-dom'
-import { Grid, TextField, InputLabel, FormControl, OutlinedInput, InputAdornment, IconButton, Button} from '@material-ui/core'
-import Visibility from '@material-ui/icons/Visibility';
-import VisibilityOff from '@material-ui/icons/VisibilityOff';
+import React from 'react';
+import { Redirect } from 'react-router-dom'
+import { getAuthenticate } from '../../actions/userAction'
+import { connect } from 'react-redux';
+import Button from '@material-ui/core/Button';
+import CssBaseline from '@material-ui/core/CssBaseline';
+import TextField from '@material-ui/core/TextField';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import Checkbox from '@material-ui/core/Checkbox';
+import Link from '@material-ui/core/Link';
+import Grid from '@material-ui/core/Grid';
+import Typography from '@material-ui/core/Typography';
+import Container from '@material-ui/core/Container';
 
-class Login extends Component {
-    constructor(props) {
-        super(props);
-        this.state = { 
-            userName : '',
-            password: '',
-            showPassword: false,
-        }
+class Login extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { 
+      username : '',
+      password : '',
+      user : null
+     }
+  }
+
+  handleChange = prop => event => {
+    this.setState({ [prop]: event.target.value });
+  };
+
+  inputValidation = () => {
+    const { username, password } = this.state;
+    let isValid = false;
+    const noSpace = /^\S*$/;
+    if (noSpace.test(username) && noSpace.test(password) && username !== '' && password !== '') {
+        isValid = true;
     }
+    return isValid;
+  }
 
-    onSubmit = () =>{
-        axios({
-            method: 'GET',
-            url: 'http://www.mocky.io/v2/5dd26cd73300000e007a3b69#',
-            }).then(res => {
-                console.log(res);
-                // res.status === 'success' ? <Redirect to='/dashboard' /> : null
-            })
-    }
+  onSubmit = () => {
+    const isValid = this.inputValidation();
+    const { username, password } = this.state;
+    if(isValid) 
+      this.props.getAuthenticate({username, password})
+    
+  }
 
-
-    render() { 
-        const { showPassword, password } = this.state;
-
-        const handleChange = prop => event => {
-            this.setState({ [prop]: event.target.value });
-        };
-        
-        const handleClickShowPassword = () => {
-        this.setState({showPassword: !showPassword });
-        };
-
-        return ( 
-            <Grid container spacing={0} direction="column" alignItems="center" justify="center" style={{ minHeight: '100vh' }}>
-                <Grid item xs={3}>
-                <TextField id="outlined-basic" label="Email id / Username" variant="outlined" onChange={handleChange('userName')} style={{width : '350px', marginBottom : '15px'}}/>
-
-                <FormControl variant="outlined">
-                <InputLabel htmlFor="outlined-adornment-password">Password</InputLabel>
-                <OutlinedInput
-                    id="outlined-adornment-password"
-                    type={ showPassword ? 'text' : 'password'}
-                    value={password}
-                    onChange={handleChange('password')}
-                    endAdornment={
-                    <InputAdornment position="end">
-                        <IconButton
-                        aria-label="toggle password visibility"
-                        onClick={handleClickShowPassword}
-                        edge="end"
-                        >
-                        {showPassword ? <Visibility /> : <VisibilityOff />}
-                        </IconButton>
-                    </InputAdornment>
-                    }
-                    labelWidth={70}
-                    style={{width : '350px'}}
-                />
-                </FormControl>
-
-                <Button onClick={this.onSubmit}>Submit</Button>
-                </Grid>   
-            </Grid> 
-         );
-    }
+  render() { 
+    const { userData } = this.props;
+    console.log(userData);
+    return ( 
+    userData === null ? 
+      <>
+      <Container component="main" maxWidth="xs">
+      <CssBaseline />
+      <div className='container'>
+        <Typography component="h1" variant="h5">
+          Sign in
+        </Typography>
+        <div>
+          <TextField
+            variant="outlined"
+            margin="normal"
+            required
+            fullWidth
+            id="email"
+            label="Email Address"
+            name="email"
+            autoComplete="email"
+            autoFocus
+            onChange = {this.handleChange('username')}
+          />
+          <TextField
+            variant="outlined"
+            margin="normal"
+            required
+            fullWidth
+            name="password"
+            label="Password"
+            type="password"
+            id="password"
+            autoComplete="current-password"
+            onChange = { this.handleChange('password')}
+          />
+          <FormControlLabel
+            control={<Checkbox value="remember" color="primary" />}
+            label="Remember me"
+          />
+          <Button
+            type="submit"
+            fullWidth
+            variant="contained"
+            color="primary"
+            onClick = {this.onSubmit}
+          >
+            Sign In
+          </Button>
+          <Grid container>
+            <Grid item xs>
+              <Link href="#" variant="body2">
+                Forgot password?
+              </Link>
+            </Grid>
+            <Grid item>
+              <Link href="#" variant="body2">
+                {"Don't have an account? Sign Up"}
+              </Link>
+            </Grid>
+          </Grid>
+        </div>
+      </div>
+    </Container>   
+    </> 
+    : <Redirect to='/dashboard' />
+     );
+  }
 }
  
-export default Login;
+const mapStateToProps = (state) => ({
+  userData : state.setUserDataReducer.userData
+})
+
+const mapDispatchToProps = (dispatch) => ({
+  getAuthenticate : (user) => dispatch(getAuthenticate(user)),
+});
+
+export default connect(mapStateToProps, mapDispatchToProps)(Login);
